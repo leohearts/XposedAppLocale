@@ -1,16 +1,15 @@
 package com.zhangfx.xposed.applocale;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -23,7 +22,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     private static Context context;
     private static PackageManager pm;
     private static SharedPreferences prefs;
-    private static LocaleList localeList;
 
     public MyAdapter(PackageManager pm, SharedPreferences prefs, ArrayList<AppItem> appItemList) {
         setHasStableIds(true);
@@ -52,7 +50,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         context = parent.getContext();
-        localeList = new LocaleList("");
 
         ViewHolder viewHolder = new ViewHolder(LayoutInflater.from(context).inflate(R.layout.app_item, parent, false));
 
@@ -61,41 +58,62 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        AppItem app = getItem(position);
+        final AppItem app = getItem(position);
 
         holder.appIcon.setImageDrawable(pm.getApplicationIcon(app.getApplicationInfo()));
         holder.appLabel.setText((String) pm.getApplicationLabel(app.getApplicationInfo()));
         holder.appPackage.setText(app.getPackageInfo().packageName);
-        holder.appLocale.setTag(app.getApplicationInfo().packageName);
+        holder.appLocale.setText(prefs.getString(app.getPackageInfo().packageName, Common.DEFAULT_LOCALE));
+        holder.appLocale.setTag(app.getPackageInfo().packageName);
 
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_activated_1, localeList.getLocaleCodes());
-        holder.appLocale.setAdapter(dataAdapter);
-        holder.appLocale.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        holder.appLocale.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String packageName = (String) parent.getTag();
-                String currentLocale = prefs.getString(packageName, Common.DEFAULT_LOCALE);
-
-                SharedPreferences.Editor editor = prefs.edit();
-                if (position == 0) {
-                    if (!currentLocale.contentEquals(Common.DEFAULT_LOCALE)) {
-                        editor.remove(packageName);
-                        editor.commit();
+            public void onClick(final View v) {
+                String currentLocale = prefs.getString(app.getPackageInfo().packageName, Common.DEFAULT_LOCALE);
+                String[] defaultLocales = new LocaleList("").getLocaleCodes();
+                String langs = prefs.getString("languages", "");
+                if (!langs.isEmpty()) {
+                    if (!currentLocale.contentEquals(Common.DEFAULT_LOCALE) && !langs.contains(currentLocale)) {
+                        langs = currentLocale + "," + langs;
                     }
-                } else {
-                    editor.putString(packageName, localeList.getLocaleCodes()[position]);
-                    editor.commit();
+
+                    langs = Common.DEFAULT_LOCALE + "," + langs;
+
+                    defaultLocales = langs.split(",");
                 }
-            }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
+                final String[] locales = defaultLocales;
 
+                int index = Arrays.asList(defaultLocales).indexOf(currentLocale);
+
+                new AlertDialog.Builder(context)
+                        .setTitle((String) pm.getApplicationLabel(app.getApplicationInfo()))
+                        .setSingleChoiceItems(locales, index, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                TextView appLocale = (TextView) v;
+                                appLocale.setText(locales[which]);
+
+                                String packageName = (String) v.getTag();
+                                String currentLocale = prefs.getString(packageName, Common.DEFAULT_LOCALE);
+
+                                SharedPreferences.Editor prefsEditor = prefs.edit();
+                                if (which == 0) {
+                                    if (!currentLocale.contentEquals(Common.DEFAULT_LOCALE)) {
+                                        prefsEditor.remove(packageName);
+                                        prefsEditor.commit();
+                                    }
+                                } else {
+                                    prefsEditor.putString(packageName, locales[which]);
+                                    prefsEditor.commit();
+                                }
+                            }
+                        })
+                        .setNegativeButton(R.string.choose_languages_cancel, null)
+                        .create().show();
             }
         });
-
-        String currentLocale = prefs.getString(app.getPackageInfo().packageName, Common.DEFAULT_LOCALE);
-        holder.appLocale.setSelection(localeList.getLocalePos(currentLocale));
     }
 
     public void clear() {
@@ -121,7 +139,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         ImageView appIcon;
         TextView appLabel;
         TextView appPackage;
-        Spinner appLocale;
+        TextView appLocale;
 
         public ViewHolder(View view) {
             super(view);
@@ -129,7 +147,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             appIcon = (ImageView) view.findViewById(R.id.app_icon);
             appLabel = (TextView) view.findViewById(R.id.app_label);
             appPackage = (TextView) view.findViewById(R.id.app_package);
-            appLocale = (Spinner) view.findViewById(R.id.app_locale);
+            appLocale = (TextView) view.findViewById(R.id.app_locale);
         }
     }
 }

@@ -36,9 +36,13 @@
 
     </LinearLayout>
 
-    <Spinner
+    <TextView
         android:id="@+id/app_locale"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:paddingLeft="16dp"
+        android:text="APP LOCALE"
+        android:layout_gravity="bottom"
+        android:textColor="@color/colorPrimary" />
 
 </LinearLayout>

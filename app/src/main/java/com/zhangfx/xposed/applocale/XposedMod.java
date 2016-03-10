@@ -29,7 +29,8 @@ public class XposedMod implements IXposedHookZygoteInit, IXposedHookLoadPackage 
         loadPrefs();
 
         try {
-            findAndHookMethod(Resources.class, "updateConfiguration",
+            findAndHookMethod(
+                    Resources.class, "updateConfiguration",
                     Configuration.class, DisplayMetrics.class, "android.content.res.CompatibilityInfo",
                     new XC_MethodHook() {
                         @Override
@@ -55,7 +56,8 @@ public class XposedMod implements IXposedHookZygoteInit, IXposedHookLoadPackage 
                             String hostPackageName = AndroidAppHelper.currentPackageName();
                             boolean isActiveApp = hostPackageName.equals(packageName);
 
-                            Configuration newConfig = new Configuration((Configuration) param.args[0]);;
+                            Configuration newConfig = new Configuration((Configuration) param.args[0]);
+
                             if (packageName != null) {
                                 Locale loc = getPackageSpecificLocale(packageName);
                                 if (loc != null) {

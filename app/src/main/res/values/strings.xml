@@ -3,4 +3,8 @@
     <string name="xposed_description">Set language on a per-app basis</string>
 
     <string name="action_search">Search</string>
+    <string name="action_language">Languages</string>
+    <string name="choose_languages">Choose Languages</string>
+    <string name="choose_languages_save">Save</string>
+    <string name="choose_languages_cancel">Cancel</string>
 </resources>
