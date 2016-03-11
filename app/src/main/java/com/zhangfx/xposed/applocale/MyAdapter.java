@@ -64,11 +64,13 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         holder.appLabel.setText((String) pm.getApplicationLabel(app.getApplicationInfo()));
         holder.appPackage.setText(app.getPackageInfo().packageName);
         holder.appLocale.setText(prefs.getString(app.getPackageInfo().packageName, Common.DEFAULT_LOCALE));
-        holder.appLocale.setTag(app.getPackageInfo().packageName);
 
-        holder.appLocale.setOnClickListener(new View.OnClickListener() {
+        holder.itemView.setTag(app);
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
+                final AppItem app = (AppItem) v.getTag();
                 String currentLocale = prefs.getString(app.getPackageInfo().packageName, Common.DEFAULT_LOCALE);
                 String[] defaultLocales = new LocaleList("").getLocaleCodes();
                 String langs = prefs.getString("languages", "");
@@ -92,10 +94,10 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
-                                TextView appLocale = (TextView) v;
+                                TextView appLocale = (TextView) v.findViewById(R.id.app_locale);
                                 appLocale.setText(locales[which]);
 
-                                String packageName = (String) v.getTag();
+                                String packageName = app.getPackageInfo().packageName;
                                 String currentLocale = prefs.getString(packageName, Common.DEFAULT_LOCALE);
 
                                 SharedPreferences.Editor prefsEditor = prefs.edit();
