@@ -1,10 +1,13 @@
 package com.zhangfx.xposed.applocale;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AlertDialog;
@@ -19,14 +22,17 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+@SuppressLint("WorldReadableFiles")
 public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
+    private static File prefsFile = new File(Environment.getDataDirectory(), String.format("data/%s/shared_prefs/%s.xml", Common.MY_PACKAGE_NAME, Common.PREFS));
     private SharedPreferences mPrefs;
     private ArrayList<String> languages;
     private boolean[] checkItems;
@@ -47,7 +53,8 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mPrefs = getSharedPreferences(Common.PREFS, MODE_WORLD_READABLE);
+        prefsFile.setReadable(true, false);
+        mPrefs = getSharedPreferences(Common.PREFS, Context.MODE_WORLD_READABLE);
 
         languages = new ArrayList<>();
         LocaleList localeList = new LocaleList("");

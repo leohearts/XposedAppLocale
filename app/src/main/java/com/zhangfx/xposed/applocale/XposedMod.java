@@ -56,11 +56,13 @@ public class XposedMod implements IXposedHookZygoteInit, IXposedHookLoadPackage 
                             String hostPackageName = AndroidAppHelper.currentPackageName();
                             boolean isActiveApp = hostPackageName.equals(packageName);
 
-                            Configuration newConfig = new Configuration((Configuration) param.args[0]);
+                            Configuration newConfig = null;
 
                             if (packageName != null) {
                                 Locale loc = getPackageSpecificLocale(packageName);
                                 if (loc != null) {
+                                    newConfig = new Configuration((Configuration) param.args[0]);
+
                                     setConfigurationLocale(newConfig, loc);
 
                                     if (isActiveApp) {
