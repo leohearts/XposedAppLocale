@@ -1,11 +1,13 @@
 package com.zhangfx.xposed.applocale;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
@@ -42,6 +44,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     private ArrayList<AppItem> appItemList;
     private PackageManager pm;
 
+    private ProgressDialog mProgressDialog;
     private SearchView mSearchView;
     private RecyclerView mRecyclerView;
 
@@ -73,6 +76,9 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         tmpCheckItems = Arrays.copyOf(checkItems, checkItems.length);
 
         mRecyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        mRecyclerView.addItemDecoration(new DividerDecoration(this));
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -85,25 +91,13 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         pm = getPackageManager();
         List<PackageInfo> packages = pm.getInstalledPackages(0);
 
-        appItemList = new ArrayList<>();
-        for (PackageInfo packageInfo : packages) {
-            if (packageInfo.applicationInfo.enabled) {
-                appItemList.add(new AppItem(packageInfo));
-            }
-        }
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        mProgressDialog.setMax(packages.size());
+        mProgressDialog.setMessage(getString(R.string.loading_apps));
+        mProgressDialog.setCancelable(false);
 
-        Collections.sort(appItemList, new Comparator<AppItem>() {
-            @Override
-            public int compare(AppItem lhs, AppItem rhs) {
-                return lhs.getPackageInfo().packageName.compareToIgnoreCase(rhs.getPackageInfo().packageName);
-            }
-        });
-
-        mRecyclerView.setAdapter(myAdapter = new MyAdapter(pm, mPrefs, appItemList));
-
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
-        mRecyclerView.addItemDecoration(new DividerDecoration(this));
+        new GetAppsTask().execute(packages);
     }
 
     @Override
@@ -171,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
         for (AppItem appItem : appItemList) {
             if (appItem.getPackageInfo().packageName.toLowerCase().contains(query)
-                    || pm.getApplicationLabel(appItem.getApplicationInfo()).toString().toLowerCase().contains(query)) {
+                    || appItem.getAppLabel().toLowerCase().contains(query)) {
                 subAppItemList.add(appItem);
             }
         }
@@ -185,5 +179,52 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     @Override
     public boolean onQueryTextSubmit(String query) {
         return false;
+    }
+
+    private class GetAppsTask extends AsyncTask<List<PackageInfo>, Integer, ArrayList<AppItem>> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            mProgressDialog.show();
+        }
+
+        @Override
+        protected ArrayList<AppItem> doInBackground(List<PackageInfo>... params) {
+            ArrayList<AppItem> appItems = new ArrayList<>();
+
+            int i = 1;
+            for (PackageInfo packageInfo : params[0]) {
+                if (packageInfo.applicationInfo.enabled) {
+                    appItems.add(new AppItem(packageInfo, pm.getApplicationLabel(packageInfo.applicationInfo).toString()));
+                }
+
+                publishProgress(i++);
+            }
+
+            return appItems;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+            mProgressDialog.setProgress(values[0]);
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<AppItem> appItems) {
+            super.onPostExecute(appItems);
+            mProgressDialog.dismiss();
+
+            appItemList = appItems;
+
+            Collections.sort(appItemList, new Comparator<AppItem>() {
+                @Override
+                public int compare(AppItem lhs, AppItem rhs) {
+                    return lhs.getAppLabel().compareToIgnoreCase(rhs.getAppLabel());
+                }
+            });
+
+            mRecyclerView.setAdapter(myAdapter = new MyAdapter(pm, mPrefs, appItemList));
+        }
     }
 }

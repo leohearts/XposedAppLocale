@@ -6,9 +6,11 @@ import android.content.pm.PackageInfo;
 public class AppItem {
 
     private PackageInfo packageInfo;
+    private String appLabel;
 
-    public AppItem(PackageInfo packageInfo) {
+    public AppItem(PackageInfo packageInfo, String appLabel) {
         this.packageInfo = packageInfo;
+        this.appLabel = appLabel;
     }
 
     public PackageInfo getPackageInfo() {
@@ -19,4 +21,7 @@ public class AppItem {
         return packageInfo.applicationInfo;
     }
 
+    public String getAppLabel() {
+        return appLabel;
+    }
 }

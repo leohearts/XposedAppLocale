@@ -2,6 +2,7 @@
     <string name="app_name">App Locale</string>
     <string name="xposed_description">Set language on a per-app basis</string>
 
+    <string name="loading_apps">Loading Apps&#8230;</string>
     <string name="action_search">Search</string>
     <string name="action_language">Languages</string>
     <string name="choose_languages">Choose Languages</string>

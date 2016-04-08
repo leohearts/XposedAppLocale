@@ -61,7 +61,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         final AppItem app = getItem(position);
 
         holder.appIcon.setImageDrawable(pm.getApplicationIcon(app.getApplicationInfo()));
-        holder.appLabel.setText((String) pm.getApplicationLabel(app.getApplicationInfo()));
+        holder.appLabel.setText(app.getAppLabel());
         holder.appPackage.setText(app.getPackageInfo().packageName);
         holder.appLocale.setText(prefs.getString(app.getPackageInfo().packageName, Common.DEFAULT_LOCALE));
 
