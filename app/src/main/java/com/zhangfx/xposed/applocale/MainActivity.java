@@ -224,7 +224,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                 }
             });
 
-            mRecyclerView.setAdapter(myAdapter = new MyAdapter(pm, mPrefs, appItemList));
+            mRecyclerView.setAdapter(myAdapter = new MyAdapter(getApplicationContext(), pm, mPrefs, appItemList));
         }
     }
 }

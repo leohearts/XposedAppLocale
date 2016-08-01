@@ -23,9 +23,10 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     private static PackageManager pm;
     private static SharedPreferences prefs;
 
-    public MyAdapter(PackageManager pm, SharedPreferences prefs, ArrayList<AppItem> appItemList) {
+    public MyAdapter(Context context, PackageManager pm, SharedPreferences prefs, ArrayList<AppItem> appItemList) {
         setHasStableIds(true);
 
+        this.context = context;
         this.pm = pm;
         this.prefs = prefs;
         addAll(appItemList);
@@ -63,7 +64,14 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         holder.appIcon.setImageDrawable(pm.getApplicationIcon(app.getApplicationInfo()));
         holder.appLabel.setText(app.getAppLabel());
         holder.appPackage.setText(app.getPackageInfo().packageName);
-        holder.appLocale.setText(prefs.getString(app.getPackageInfo().packageName, Common.DEFAULT_LOCALE));
+
+        String appLocale = prefs.getString(app.getPackageInfo().packageName, Common.DEFAULT_LOCALE);
+        holder.appLocale.setText(appLocale);
+        if (appLocale.equals(Common.DEFAULT_LOCALE)) {
+            holder.appLocale.setTextColor(context.getResources().getColor(R.color.colorPrimary));
+        } else {
+            holder.appLocale.setTextColor(context.getResources().getColor(R.color.colorAccent));
+        }
 
         holder.itemView.setTag(app);
 
@@ -106,9 +114,11 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
                                         prefsEditor.remove(packageName);
                                         prefsEditor.commit();
                                     }
+                                    appLocale.setTextColor(context.getResources().getColor(R.color.colorPrimary));
                                 } else {
                                     prefsEditor.putString(packageName, locales[which]);
                                     prefsEditor.commit();
+                                    appLocale.setTextColor(context.getResources().getColor(R.color.colorAccent));
                                 }
                             }
                         })
