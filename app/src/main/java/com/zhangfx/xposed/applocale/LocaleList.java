@@ -1,6 +1,6 @@
 package com.zhangfx.xposed.applocale;
 
-import android.content.res.Resources;
+import android.content.Context;
 
 import java.text.Collator;
 import java.util.Arrays;
@@ -40,8 +40,8 @@ public class LocaleList {
     private String[] localeCodes;
     private String[] localeDescriptions;
 
-    public LocaleList(String defaultLabel) {
-        final String[] locales = Resources.getSystem().getAssets().getLocales();
+    public LocaleList(Context context, String defaultLabel) {
+        final String[] locales = context.getResources().getStringArray(R.array.locales);
         Arrays.sort(locales);
         final int origSize = locales.length;
         final LocaleInfo[] preprocess = new LocaleInfo[origSize];
@@ -145,4 +145,3 @@ public class LocaleList {
     }
 
 }
-

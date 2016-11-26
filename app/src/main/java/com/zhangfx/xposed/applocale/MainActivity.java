@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         mPrefs = getSharedPreferences(Common.PREFS, Context.MODE_WORLD_READABLE);
 
         languages = new ArrayList<>();
-        LocaleList localeList = new LocaleList("");
+        LocaleList localeList = new LocaleList(getApplicationContext(), "");
         languages.addAll(localeList.getDescriptionList());
         languages.remove(0);
 
@@ -129,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                             public void onClick(DialogInterface dialog, int which) {
                                 checkItems = Arrays.copyOf(tmpCheckItems, tmpCheckItems.length);
 
-                                LocaleList localeList = new LocaleList("");
+                                LocaleList localeList = new LocaleList(getApplicationContext(), "");
                                 ArrayList<String> langs = new ArrayList<>();
                                 for (int i = 0; i < checkItems.length; i++) {
                                     if (checkItems[i]) {

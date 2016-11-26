@@ -80,7 +80,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             public void onClick(final View v) {
                 final AppItem app = (AppItem) v.getTag();
                 String currentLocale = prefs.getString(app.getPackageInfo().packageName, Common.DEFAULT_LOCALE);
-                String[] defaultLocales = new LocaleList("").getLocaleCodes();
+                String[] defaultLocales = new LocaleList(context, "").getLocaleCodes();
                 String langs = prefs.getString("languages", "");
                 if (!langs.isEmpty()) {
                     if (!currentLocale.contentEquals(Common.DEFAULT_LOCALE) && !langs.contains(currentLocale)) {

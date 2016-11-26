@@ -16,9 +16,8 @@ import de.robv.android.xposed.IXposedHookZygoteInit;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XSharedPreferences;
 import de.robv.android.xposed.XposedBridge;
+import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
-
-import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 
 public class XposedMod implements IXposedHookZygoteInit, IXposedHookLoadPackage {
 
@@ -29,7 +28,7 @@ public class XposedMod implements IXposedHookZygoteInit, IXposedHookLoadPackage 
         loadPrefs();
 
         try {
-            findAndHookMethod(
+            XposedHelpers.findAndHookMethod(
                     Resources.class, "updateConfiguration",
                     Configuration.class, DisplayMetrics.class, "android.content.res.CompatibilityInfo",
                     new XC_MethodHook() {
