@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         prefsFile.setReadable(true, false);
@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.addItemDecoration(new DividerDecoration(this));
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
-        MenuItem item = (MenuItem) menu.findItem(R.id.action_search);
+        MenuItem item = menu.findItem(R.id.action_search);
         mSearchView = (SearchView) MenuItemCompat.getActionView(item);
         mSearchView.setOnQueryTextListener(this);
 

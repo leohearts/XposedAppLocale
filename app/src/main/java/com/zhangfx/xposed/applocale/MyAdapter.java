@@ -156,10 +156,10 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         public ViewHolder(View view) {
             super(view);
 
-            appIcon = (ImageView) view.findViewById(R.id.app_icon);
-            appLabel = (TextView) view.findViewById(R.id.app_label);
-            appPackage = (TextView) view.findViewById(R.id.app_package);
-            appLocale = (TextView) view.findViewById(R.id.app_locale);
+            appIcon = view.findViewById(R.id.app_icon);
+            appLabel = view.findViewById(R.id.app_label);
+            appPackage = view.findViewById(R.id.app_package);
+            appLocale = view.findViewById(R.id.app_locale);
         }
     }
 }

@@ -1,13 +1,12 @@
 package com.zhangfx.xposed.applocale;
 
-import android.annotation.SuppressLint;
 import android.app.AndroidAppHelper;
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.content.res.XModuleResources;
-import android.content.res.XResources;
 import android.os.Build;
-import android.util.DisplayMetrics;
+import android.support.annotation.Nullable;
 
 import java.util.Locale;
 
@@ -28,66 +27,41 @@ public class XposedMod implements IXposedHookZygoteInit, IXposedHookLoadPackage 
         loadPrefs();
 
         try {
-            XposedHelpers.findAndHookMethod(
-                    Resources.class, "updateConfiguration",
-                    Configuration.class, DisplayMetrics.class, "android.content.res.CompatibilityInfo",
-                    new XC_MethodHook() {
+            XposedHelpers.findAndHookMethod(ContextWrapper.class, "attachBaseContext",
+                    Context.class, new XC_MethodHook() {
                         @Override
                         protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                            if (param.args[0] == null) {
+                            if (param.args[0] == null || !(param.args[0] instanceof Context)) {
                                 return;
                             }
 
-                            String packageName;
-                            Resources res = ((Resources) param.thisObject);
-                            if (res instanceof XResources) {
-                                packageName = ((XResources) res).getPackageName();
-                            } else if (res instanceof XModuleResources) {
-                                return;
-                            } else {
-                                try {
-                                    packageName = XResources.getPackageNameDuringConstruction();
-                                } catch (IllegalStateException e) {
-                                    return;
-                                }
-                            }
-
+                            Context context = (Context) param.args[0];
+                            String packageName = context.getPackageName();
+                            Locale locale = getPackageSpecificLocale(packageName);
                             String hostPackageName = AndroidAppHelper.currentPackageName();
                             boolean isActiveApp = hostPackageName.equals(packageName);
 
-                            Configuration newConfig = null;
-
-                            if (packageName != null) {
-                                Locale loc = getPackageSpecificLocale(packageName);
-                                if (loc != null) {
-                                    newConfig = new Configuration((Configuration) param.args[0]);
-
-                                    setConfigurationLocale(newConfig, loc);
-
-                                    if (isActiveApp) {
-                                        Locale.setDefault(loc);
-                                    }
-                                }
+                            if (packageName == null || locale == null || !isActiveApp) {
+                                return;
                             }
 
-                            if (newConfig != null) {
-                                param.args[0] = newConfig;
+                            Resources res = context.getResources();
+                            Configuration config = new Configuration(res.getConfiguration());
+
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                                config.setLocale(locale); // config.setLayoutDirection(local);
+                                context = context.createConfigurationContext(config);
+                            } else {
+                                config.locale = locale;
+                                res.updateConfiguration(config, res.getDisplayMetrics());
                             }
+
+                            param.args[0] = context;
                         }
                     }
             );
-        } catch (Throwable t) {
-            XposedBridge.log(t);
-        }
-    }
-
-    @SuppressLint("NewApi")
-    private void setConfigurationLocale(Configuration config, Locale loc) {
-        config.locale = loc;
-
-        if (Build.VERSION.SDK_INT >= 17) {
-            // Don't use setLocale() in order not to trigger userSetLocale
-            config.setLayoutDirection(loc);
+        } catch (Exception e) {
+            XposedBridge.log(e);
         }
     }
 
@@ -102,6 +76,7 @@ public class XposedMod implements IXposedHookZygoteInit, IXposedHookLoadPackage 
         }
     }
 
+    @Nullable
     private static Locale getPackageSpecificLocale(String packageName) {
         String locale = prefs.getString(packageName, Common.DEFAULT_LOCALE);
 
@@ -117,8 +92,7 @@ public class XposedMod implements IXposedHookZygoteInit, IXposedHookLoadPackage 
         return new Locale(language, region, variant);
     }
 
-    public static void loadPrefs() {
+    private static void loadPrefs() {
         prefs = new XSharedPreferences(Common.MY_PACKAGE_NAME, Common.PREFS);
-        prefs.makeWorldReadable();
     }
 }
