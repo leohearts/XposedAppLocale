@@ -11,7 +11,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -29,23 +28,22 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 
-@SuppressLint("WorldReadableFiles")
+@SuppressLint({"WorldReadableFiles", "SetWorldReadable"})
 public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
-    private static File prefsFile = new File(Environment.getDataDirectory(), String.format("data/%s/shared_prefs/%s.xml", Common.MY_PACKAGE_NAME, Common.PREFS));
+    private static File PREFS_FILE = new File(Environment.getDataDirectory(), String.format("data/%s/shared_prefs/%s.xml", Common.MY_PACKAGE_NAME, Common.PREFS));
+
     private SharedPreferences mPrefs;
-    private ArrayList<String> languages;
+
+    private List<String> languages;
+
     private boolean[] checkItems;
+
     private boolean[] tmpCheckItems;
 
-    private MyAdapter myAdapter;
-    private ArrayList<AppItem> appItemList;
-    private PackageManager pm;
-
-    private ProgressDialog mProgressDialog;
-    private SearchView mSearchView;
     private RecyclerView mRecyclerView;
 
     @Override
@@ -56,18 +54,18 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        prefsFile.setReadable(true, false);
+        PREFS_FILE.setReadable(true, false);
         mPrefs = getSharedPreferences(Common.PREFS, Context.MODE_WORLD_READABLE);
 
-        languages = new ArrayList<>();
+        languages = new LinkedList<>();
         LocaleList localeList = new LocaleList(getApplicationContext(), "");
         languages.addAll(localeList.getDescriptionList());
         languages.remove(0);
 
         checkItems = new boolean[languages.size()];
-        String[] langs = mPrefs.getString("languages", "").split(",");
-        for (int i = 0; i < langs.length; i++) {
-            int index = languages.indexOf(localeList.getDescriptionList().get(localeList.getLocalePos(langs[i])));
+        String[] languages = mPrefs.getString("languages", "").split(",");
+        for (String lang : languages) {
+            int index = this.languages.indexOf(localeList.getDescriptionList().get(localeList.getLocalePos(lang)));
             if (index > -1) {
                 checkItems[index] = true;
             }
@@ -75,10 +73,11 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
         tmpCheckItems = Arrays.copyOf(checkItems, checkItems.length);
 
-        mRecyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+        mRecyclerView = findViewById(R.id.recyclerView);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.addItemDecoration(new DividerDecoration(this));
+        mRecyclerView.setAdapter(new MyAdapter(this));
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -88,16 +87,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             }
         });
 
-        pm = getPackageManager();
-        List<PackageInfo> packages = pm.getInstalledPackages(0);
-
-        mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        mProgressDialog.setMax(packages.size());
-        mProgressDialog.setMessage(getString(R.string.loading_apps));
-        mProgressDialog.setCancelable(false);
-
-        new GetAppsTask().execute(packages);
+        new GetAppsTask(this, (MyAdapter) mRecyclerView.getAdapter()).execute();
     }
 
     @Override
@@ -105,10 +95,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
-        MenuItem item = menu.findItem(R.id.action_search);
-        mSearchView = (SearchView) MenuItemCompat.getActionView(item);
-        mSearchView.setOnQueryTextListener(this);
-
+        ((SearchView) menu.findItem(R.id.action_search).getActionView()).setOnQueryTextListener(this);
         return true;
     }
 
@@ -130,16 +117,16 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                                 checkItems = Arrays.copyOf(tmpCheckItems, tmpCheckItems.length);
 
                                 LocaleList localeList = new LocaleList(getApplicationContext(), "");
-                                ArrayList<String> langs = new ArrayList<>();
+                                ArrayList<String> languages = new ArrayList<>();
                                 for (int i = 0; i < checkItems.length; i++) {
                                     if (checkItems[i]) {
-                                        langs.add(localeList.getLocaleCodes()[localeList.getDescriptionList().indexOf(languages.get(i))]);
+                                        languages.add(localeList.getLocaleCodes()[localeList.getDescriptionList().indexOf(MainActivity.this.languages.get(i))]);
                                     }
                                 }
 
                                 SharedPreferences.Editor prefsEditor = mPrefs.edit();
-                                prefsEditor.putString("languages", TextUtils.join(",", langs));
-                                prefsEditor.commit();
+                                prefsEditor.putString("languages", TextUtils.join(",", languages));
+                                prefsEditor.apply();
                             }
                         })
                         .setNegativeButton(R.string.choose_languages_cancel, new DialogInterface.OnClickListener() {
@@ -157,20 +144,19 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        myAdapter.clear();
+        ((MyAdapter) mRecyclerView.getAdapter()).clear();
 
-        ArrayList<AppItem> subAppItemList = new ArrayList<>();
-
+        List<AppItem> subAppItemList = new LinkedList<>();
         String query = newText.toLowerCase();
 
-        for (AppItem appItem : appItemList) {
+        for (AppItem appItem : ((MyAdapter) mRecyclerView.getAdapter()).getAll()) {
             if (appItem.getPackageInfo().packageName.toLowerCase().contains(query)
                     || appItem.getAppLabel().toLowerCase().contains(query)) {
                 subAppItemList.add(appItem);
             }
         }
 
-        myAdapter.addAll(subAppItemList);
+        ((MyAdapter) mRecyclerView.getAdapter()).addAll(subAppItemList);
         mRecyclerView.scrollToPosition(0);
 
         return false;
@@ -181,7 +167,24 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         return false;
     }
 
-    private class GetAppsTask extends AsyncTask<List<PackageInfo>, Integer, ArrayList<AppItem>> {
+    private static class GetAppsTask extends AsyncTask<Void, Integer, List<AppItem>> {
+
+        private final PackageManager pm;
+
+        private final ProgressDialog mProgressDialog;
+
+        private final MyAdapter adapter;
+
+        private GetAppsTask(Context context, MyAdapter adapter) {
+            pm = context.getPackageManager();
+            this.adapter = adapter;
+
+            mProgressDialog = new ProgressDialog(context);
+            mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            mProgressDialog.setMessage(context.getString(R.string.loading_apps));
+            mProgressDialog.setCancelable(false);
+        }
+
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -189,11 +192,13 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         }
 
         @Override
-        protected ArrayList<AppItem> doInBackground(List<PackageInfo>... params) {
-            ArrayList<AppItem> appItems = new ArrayList<>();
+        protected List<AppItem> doInBackground(Void... params) {
+            List<AppItem> appItems = new ArrayList<>();
+            List<PackageInfo> packages = pm.getInstalledPackages(0);
+            mProgressDialog.setMax(packages.size());
 
             int i = 1;
-            for (PackageInfo packageInfo : params[0]) {
+            for (PackageInfo packageInfo : pm.getInstalledPackages(0)) {
                 if (packageInfo.applicationInfo.enabled) {
                     appItems.add(new AppItem(packageInfo, pm.getApplicationLabel(packageInfo.applicationInfo).toString()));
                 }
@@ -211,20 +216,18 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         }
 
         @Override
-        protected void onPostExecute(ArrayList<AppItem> appItems) {
+        protected void onPostExecute(List<AppItem> appItems) {
             super.onPostExecute(appItems);
-            mProgressDialog.dismiss();
 
-            appItemList = appItems;
-
-            Collections.sort(appItemList, new Comparator<AppItem>() {
+            Collections.sort(appItems, new Comparator<AppItem>() {
                 @Override
                 public int compare(AppItem lhs, AppItem rhs) {
                     return lhs.getAppLabel().compareToIgnoreCase(rhs.getAppLabel());
                 }
             });
 
-            mRecyclerView.setAdapter(myAdapter = new MyAdapter(getApplicationContext(), pm, mPrefs, appItemList));
+            adapter.addAll(appItems);
+            mProgressDialog.dismiss();
         }
     }
 }

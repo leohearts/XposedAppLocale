@@ -1,6 +1,7 @@
 package com.flo354.xposed.applocale;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import java.text.Collator;
 import java.util.Arrays;
@@ -32,12 +33,13 @@ public class LocaleList {
         }
 
         @Override
-        public int compareTo(LocaleInfo another) {
+        public int compareTo(@NonNull LocaleInfo another) {
             return sCollator.compare(this.label, another.label);
         }
     }
 
     private String[] localeCodes;
+
     private String[] localeDescriptions;
 
     public LocaleList(Context context, String defaultLabel) {
@@ -46,8 +48,7 @@ public class LocaleList {
         final int origSize = locales.length;
         final LocaleInfo[] preprocess = new LocaleInfo[origSize];
         int finalSize = 0;
-        for (int i = 0; i < origSize; i++) {
-            final String s = locales[i];
+        for (final String s : locales) {
             final int len = s.length();
             if (len == 5) {
                 String language = s.substring(0, 2);
@@ -78,9 +79,7 @@ public class LocaleList {
         }
 
         final LocaleInfo[] localeInfos = new LocaleInfo[finalSize];
-        for (int i = 0; i < finalSize; i++) {
-            localeInfos[i] = preprocess[i];
-        }
+        System.arraycopy(preprocess, 0, localeInfos, 0, finalSize);
         Arrays.sort(localeInfos);
 
         localeCodes = new String[localeInfos.length + 1];
