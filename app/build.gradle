@@ -8,8 +8,8 @@ android {
         applicationId "com.flo354.xposed.applocale"
         minSdkVersion 15
         targetSdkVersion 23 // don't modify. Context.MODE_WORLD_READABLE removed in SDK 24+
-        versionCode 8
-        versionName "2.0.2"
+        versionCode 9
+        versionName "2.0.3"
     }
     buildTypes {
         release {
