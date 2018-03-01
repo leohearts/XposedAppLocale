@@ -1,4 +1,4 @@
-package com.zhangfx.xposed.applocale;
+package com.flo354.xposed.applocale;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;

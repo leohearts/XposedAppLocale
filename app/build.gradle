@@ -5,11 +5,11 @@ android {
     buildToolsVersion "26.0.2"
 
     defaultConfig {
-        applicationId "com.zhangfx.xposed.applocale"
+        applicationId "com.flo354.xposed.applocale"
         minSdkVersion 15
         targetSdkVersion 23
         versionCode 6
-        versionName "1.5"
+        versionName "2.0.0"
     }
     buildTypes {
         release {
@@ -22,9 +22,9 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:27.0.2'
-    compile 'com.android.support:design:27.0.2'
-    compile 'com.android.support:recyclerview-v7:27.0.2'
+    compile 'com.android.support:appcompat-v7:27.1.0'
+    compile 'com.android.support:design:27.1.0'
+    compile 'com.android.support:recyclerview-v7:27.1.0'
 
     provided 'de.robv.android.xposed:api:82'
     provided 'de.robv.android.xposed:api:82:sources'

@@ -1,4 +1,4 @@
-package com.zhangfx.xposed.applocale;
+package com.flo354.xposed.applocale;
 
 public class Common {
 
