@@ -8,6 +8,8 @@
     <string name="choose_languages">Choose Languages</string>
     <string name="choose_languages_save">Save</string>
     <string name="choose_languages_cancel">Cancel</string>
+    <string name="show_system_apps">Show system apps</string>
+    <string name="show_only_modified_apps">Show only modified apps</string>
 
     <string-array name="locales">
         <item>ar-EG</item>

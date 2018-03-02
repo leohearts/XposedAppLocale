@@ -48,6 +48,8 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
     private boolean showSystemApps;
 
+    private boolean showOnlyModifiedApps;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
         filterQuery = "";
         showSystemApps = mPrefs.getBoolean("show_system_apps", true);
+        showOnlyModifiedApps = mPrefs.getBoolean("show_only_modified_apps", false);
 
         languages = new LinkedList<>();
         LocaleList localeList = new LocaleList(getApplicationContext(), "");
@@ -111,6 +114,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
         ((SearchView) menu.findItem(R.id.action_search).getActionView()).setOnQueryTextListener(this);
         menu.findItem(R.id.action_show_system_apps).setChecked(mPrefs.getBoolean("show_system_apps", true));
+        menu.findItem(R.id.action_show_only_modified_apps).setChecked(mPrefs.getBoolean("show_only_modified_apps", false));
         return true;
     }
 
@@ -158,6 +162,11 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                 mPrefs.edit().putBoolean("show_system_apps", showSystemApps).apply();
                 filterApps();
                 return true;
+            case R.id.action_show_only_modified_apps:
+                item.setChecked(!item.isChecked());
+                showOnlyModifiedApps = item.isChecked();
+                mPrefs.edit().putBoolean("show_only_modified_apps", showOnlyModifiedApps).apply();
+                filterApps();
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -189,6 +198,16 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             List<AppItem> subAppItemList2 = new LinkedList<>(subAppItemList);
             for (AppItem appItem: subAppItemList2) {
                 if ((appItem.getApplicationInfo().flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                    subAppItemList.remove(appItem);
+                }
+            }
+        }
+
+        if (showOnlyModifiedApps) {
+            List<AppItem> subAppItemList2 = new LinkedList<>(subAppItemList);
+            for (AppItem appItem: subAppItemList2) {
+                String locale = mPrefs.getString(appItem.getPackageInfo().packageName, Common.DEFAULT_LOCALE);
+                if (locale.contentEquals(Common.DEFAULT_LOCALE)) {
                     subAppItemList.remove(appItem);
                 }
             }
