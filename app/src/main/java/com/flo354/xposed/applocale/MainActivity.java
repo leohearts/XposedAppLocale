@@ -1,14 +1,10 @@
 package com.flo354.xposed.applocale;
 
 import android.annotation.SuppressLint;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
@@ -27,8 +23,6 @@ import android.view.View;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -66,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         mPrefs = getSharedPreferences(Common.PREFS, Context.MODE_WORLD_READABLE);
 
         filterQuery = "";
+        showSystemApps = mPrefs.getBoolean("show_system_apps", true);
 
         languages = new LinkedList<>();
         LocaleList localeList = new LocaleList(getApplicationContext(), "");
@@ -99,7 +94,14 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             }
         });
 
-        new GetAppsTask(this, (MyAdapter) mRecyclerView.getAdapter(), appItemList).execute();
+        new GetAppsTask(this, new GetAppsTask.AsyncResponse() {
+            @Override
+            public void processFinish(List<AppItem> appItems) {
+                appItemList.addAll(appItems);
+                ((MyAdapter) mRecyclerView.getAdapter()).addAll(appItems);
+                filterApps();
+            }
+        }).execute();
     }
 
     @Override
@@ -108,7 +110,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
         ((SearchView) menu.findItem(R.id.action_search).getActionView()).setOnQueryTextListener(this);
-        menu.findItem(R.id.action_show_system_apps).setChecked(true);
+        menu.findItem(R.id.action_show_system_apps).setChecked(mPrefs.getBoolean("show_system_apps", true));
         return true;
     }
 
@@ -153,6 +155,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             case R.id.action_show_system_apps:
                 item.setChecked(!item.isChecked());
                 showSystemApps = item.isChecked();
+                mPrefs.edit().putBoolean("show_system_apps", showSystemApps).apply();
                 filterApps();
                 return true;
             default:
@@ -194,73 +197,5 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         ((MyAdapter) mRecyclerView.getAdapter()).clear();
         ((MyAdapter) mRecyclerView.getAdapter()).addAll(subAppItemList);
         mRecyclerView.scrollToPosition(0);
-    }
-
-    private static class GetAppsTask extends AsyncTask<Void, Integer, List<AppItem>> {
-
-        private final PackageManager pm;
-
-        private final ProgressDialog mProgressDialog;
-
-        private final MyAdapter adapter;
-
-        private final List<AppItem> appItemList;
-
-        private GetAppsTask(Context context, MyAdapter adapter, List<AppItem> appItemList) {
-            pm = context.getPackageManager();
-            this.adapter = adapter;
-            this.appItemList = appItemList;
-
-            mProgressDialog = new ProgressDialog(context);
-            mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            mProgressDialog.setMessage(context.getString(R.string.loading_apps));
-            mProgressDialog.setCancelable(false);
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            mProgressDialog.show();
-        }
-
-        @Override
-        protected List<AppItem> doInBackground(Void... params) {
-            List<AppItem> appItems = new ArrayList<>();
-            List<PackageInfo> packages = pm.getInstalledPackages(0);
-            mProgressDialog.setMax(packages.size());
-
-            int i = 1;
-            for (PackageInfo packageInfo : pm.getInstalledPackages(0)) {
-                if (packageInfo.applicationInfo.enabled) {
-                    appItems.add(new AppItem(packageInfo, pm.getApplicationLabel(packageInfo.applicationInfo).toString()));
-                }
-
-                publishProgress(i++);
-            }
-
-            return appItems;
-        }
-
-        @Override
-        protected void onProgressUpdate(Integer... values) {
-            super.onProgressUpdate(values);
-            mProgressDialog.setProgress(values[0]);
-        }
-
-        @Override
-        protected void onPostExecute(List<AppItem> appItems) {
-            super.onPostExecute(appItems);
-
-            Collections.sort(appItems, new Comparator<AppItem>() {
-                @Override
-                public int compare(AppItem lhs, AppItem rhs) {
-                    return lhs.getAppLabel().compareToIgnoreCase(rhs.getAppLabel());
-                }
-            });
-
-            adapter.addAll(appItems);
-            appItemList.addAll(appItems);
-            mProgressDialog.dismiss();
-        }
     }
 }
