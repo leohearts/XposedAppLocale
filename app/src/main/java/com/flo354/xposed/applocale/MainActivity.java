@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
@@ -48,6 +49,11 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
     private RecyclerView mRecyclerView;
 
+
+    private String filterQuery;
+
+    private boolean showSystemApps;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,6 +64,8 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
         PREFS_FILE.setReadable(true, false);
         mPrefs = getSharedPreferences(Common.PREFS, Context.MODE_WORLD_READABLE);
+
+        filterQuery = "";
 
         languages = new LinkedList<>();
         LocaleList localeList = new LocaleList(getApplicationContext(), "");
@@ -100,6 +108,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
         ((SearchView) menu.findItem(R.id.action_search).getActionView()).setOnQueryTextListener(this);
+        menu.findItem(R.id.action_show_system_apps).setChecked(true);
         return true;
     }
 
@@ -141,6 +150,11 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                         })
                         .create().show();
                 return true;
+            case R.id.action_show_system_apps:
+                item.setChecked(!item.isChecked());
+                showSystemApps = item.isChecked();
+                filterApps();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -148,26 +162,38 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        String query = newText.toLowerCase();
-        List<AppItem> subAppItemList = new LinkedList<>();
-
-        for (AppItem appItem : appItemList) {
-            if (appItem.getPackageInfo().packageName.toLowerCase().contains(query)
-                    || appItem.getAppLabel().toLowerCase().contains(query)) {
-                subAppItemList.add(appItem);
-            }
-        }
-
-        ((MyAdapter) mRecyclerView.getAdapter()).clear();
-        ((MyAdapter) mRecyclerView.getAdapter()).addAll(subAppItemList);
-        mRecyclerView.scrollToPosition(0);
-
+        filterQuery = newText.toLowerCase();
+        filterApps();
         return false;
     }
 
     @Override
     public boolean onQueryTextSubmit(String query) {
         return false;
+    }
+
+    private void filterApps() {
+        List<AppItem> subAppItemList = new LinkedList<>();
+
+        for (AppItem appItem : appItemList) {
+            if (appItem.getPackageInfo().packageName.toLowerCase().contains(filterQuery)
+                    || appItem.getAppLabel().toLowerCase().contains(filterQuery)) {
+                subAppItemList.add(appItem);
+            }
+        }
+
+        if (!showSystemApps) {
+            List<AppItem> subAppItemList2 = new LinkedList<>(subAppItemList);
+            for (AppItem appItem: subAppItemList2) {
+                if ((appItem.getApplicationInfo().flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                    subAppItemList.remove(appItem);
+                }
+            }
+        }
+
+        ((MyAdapter) mRecyclerView.getAdapter()).clear();
+        ((MyAdapter) mRecyclerView.getAdapter()).addAll(subAppItemList);
+        mRecyclerView.scrollToPosition(0);
     }
 
     private static class GetAppsTask extends AsyncTask<Void, Integer, List<AppItem>> {
