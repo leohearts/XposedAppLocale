@@ -40,6 +40,8 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
     private List<String> languages;
 
+    private List<AppItem> appItemList;
+
     private boolean[] checkItems;
 
     private boolean[] tmpCheckItems;
@@ -61,6 +63,8 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         LocaleList localeList = new LocaleList(getApplicationContext(), "");
         languages.addAll(localeList.getDescriptionList());
         languages.remove(0);
+
+        appItemList = new LinkedList<>();
 
         checkItems = new boolean[languages.size()];
         String[] languages = mPrefs.getString("languages", "").split(",");
@@ -87,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             }
         });
 
-        new GetAppsTask(this, (MyAdapter) mRecyclerView.getAdapter()).execute();
+        new GetAppsTask(this, (MyAdapter) mRecyclerView.getAdapter(), appItemList).execute();
     }
 
     @Override
@@ -144,18 +148,17 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        ((MyAdapter) mRecyclerView.getAdapter()).clear();
-
-        List<AppItem> subAppItemList = new LinkedList<>();
         String query = newText.toLowerCase();
+        List<AppItem> subAppItemList = new LinkedList<>();
 
-        for (AppItem appItem : ((MyAdapter) mRecyclerView.getAdapter()).getAll()) {
+        for (AppItem appItem : appItemList) {
             if (appItem.getPackageInfo().packageName.toLowerCase().contains(query)
                     || appItem.getAppLabel().toLowerCase().contains(query)) {
                 subAppItemList.add(appItem);
             }
         }
 
+        ((MyAdapter) mRecyclerView.getAdapter()).clear();
         ((MyAdapter) mRecyclerView.getAdapter()).addAll(subAppItemList);
         mRecyclerView.scrollToPosition(0);
 
@@ -175,9 +178,12 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
         private final MyAdapter adapter;
 
-        private GetAppsTask(Context context, MyAdapter adapter) {
+        private final List<AppItem> appItemList;
+
+        private GetAppsTask(Context context, MyAdapter adapter, List<AppItem> appItemList) {
             pm = context.getPackageManager();
             this.adapter = adapter;
+            this.appItemList = appItemList;
 
             mProgressDialog = new ProgressDialog(context);
             mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
@@ -227,6 +233,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             });
 
             adapter.addAll(appItems);
+            appItemList.addAll(appItems);
             mProgressDialog.dismiss();
         }
     }

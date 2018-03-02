@@ -20,7 +20,7 @@ import java.util.List;
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
-    private final LinkedList<AppItem> appItemList;
+    private final List<AppItem> appItemList;
 
     private final Context context;
 
