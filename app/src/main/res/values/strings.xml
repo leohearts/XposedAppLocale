@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">App Locale 2</string>
+    <string name="app_name" translatable="false">App Locale 2</string>
     <string name="xposed_description">Set language on a per-app basis</string>
 
     <string name="loading_apps">Loading Apps&#8230;</string>
@@ -11,7 +11,7 @@
     <string name="show_system_apps">Show system apps</string>
     <string name="show_only_modified_apps">Show only modified apps</string>
 
-    <string-array name="locales">
+    <string-array name="locales" translatable="false">
         <item>ar-EG</item>
         <item>ar-IL</item>
         <item>bg-BG</item>
@@ -23,6 +23,7 @@
         <item>de-DE</item>
         <item>de-LI</item>
         <item>el-GR</item>
+        <item>eo</item>
         <item>en-AU</item>
         <item>en-CA</item>
         <item>en-GB</item>
