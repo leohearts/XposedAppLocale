@@ -7,6 +7,6 @@
     <string name="choose_languages">Elekti lingvojn</string>
     <string name="choose_languages_save">Konservi</string>
     <string name="choose_languages_cancel">Nuligi</string>
-    <string name="show_system_apps">Montri nur sistemajn aplikaĵojn</string>
+    <string name="show_system_apps">Montri sistemajn aplikaĵojn</string>
     <string name="show_only_modified_apps">Montri nur modifatajn aplikaĵojn</string>
 </resources>
