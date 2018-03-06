@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name">App Locale 2</string>
     <string name="xposed_description">Nastavte jazyk pre jednotlivé aplikácie</string>
 
     <string name="loading_apps">Načítavanie aplikácií&#8230;</string>
