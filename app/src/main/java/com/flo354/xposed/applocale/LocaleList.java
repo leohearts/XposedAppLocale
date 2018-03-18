@@ -50,11 +50,14 @@ public class LocaleList {
         int finalSize = 0;
         for (final String s : locales) {
             final int len = s.length();
-            if (len == 5) {
-                String language = s.substring(0, 2);
-                String country = s.substring(3, 5);
+            final int lengthoflang = s.indexOf('-');
+                String language = s.substring(0, lengthoflang);
+                String country;
+                if (lengthoflang+1 == len) {
+                    country = "";
+                } else {country = s.substring(lengthoflang+1, lengthoflang+3);
+                }
                 final Locale l = new Locale(language, country);
-
                 if (finalSize == 0) {
                     preprocess[finalSize++] = new LocaleInfo(toTitleCase(l.getDisplayLanguage(l)), l);
                 } else {
@@ -75,7 +78,7 @@ public class LocaleList {
                         preprocess[finalSize++] = new LocaleInfo(displayName, l);
                     }
                 }
-            }
+
         }
 
         final LocaleInfo[] localeInfos = new LocaleInfo[finalSize];
