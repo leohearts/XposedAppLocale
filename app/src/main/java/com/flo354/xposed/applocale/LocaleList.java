@@ -49,14 +49,10 @@ public class LocaleList {
         final LocaleInfo[] preprocess = new LocaleInfo[origSize];
         int finalSize = 0;
         for (final String s : locales) {
-            final int len = s.length();
-            final int lengthoflang = s.indexOf('-');
-                String language = s.substring(0, lengthoflang);
-                String country;
-                if (lengthoflang+1 == len) {
-                    country = "";
-                } else {country = s.substring(lengthoflang+1, lengthoflang+3);
-                }
+            String localesSplit[] = s.split("-",2);
+            String language = localesSplit[0];
+            String country;
+            if (localesSplit.length == 2) {country = localesSplit[1];} else {country = "";}
                 final Locale l = new Locale(language, country);
                 if (finalSize == 0) {
                     preprocess[finalSize++] = new LocaleInfo(toTitleCase(l.getDisplayLanguage(l)), l);
