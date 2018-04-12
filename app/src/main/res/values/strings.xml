@@ -14,9 +14,11 @@
     <string-array name="locales" translatable="false">
         <item>ar-EG</item>
         <item>ar-IL</item>
+        <item>be</item>
         <item>bg</item>
         <item>ca</item>
         <item>cs</item>
+        <item>cy</item>
         <item>da-DK</item>
         <item>de-AT</item>
         <item>de-CH</item>
@@ -35,7 +37,11 @@
         <item>eo</item>
         <item>es-ES</item>
         <item>es-US</item>
+        <item>et</item>
+        <item>eu</item>
+        <item>fa</item>
         <item>fi</item>
+        <item>fo</item>
         <item>fr-BE</item>
         <item>fr-CA</item>
         <item>fr-CH</item>
@@ -44,13 +50,22 @@
         <item>hi</item>
         <item>hr</item>
         <item>hu</item>
+        <item>id</item>
+        <item>is</item>
         <item>it-CH</item>
         <item>it-IT</item>
         <item>ja</item>
+        <item>kk</item>
+        <item>kl</item>
         <item>ko</item>
+        <item>lb</item>
         <item>lt</item>
         <item>lv</item>
+        <item>mn</item>
+        <item>ms</item>
         <item>nb</item>
+        <item>nn</item>
+        <item>no</item>
         <item>nl-BE</item>
         <item>nl-NL</item>
         <item>pl</item>
@@ -60,8 +75,10 @@
         <item>ru</item>
         <item>sk</item>
         <item>sl</item>
+        <item>sq</item>
         <item>sr</item>
         <item>sv</item>
+        <item>ta</item>
         <item>th</item>
         <item>tr</item>
         <item>uk</item>
