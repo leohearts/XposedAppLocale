@@ -1,0 +1,12 @@
+<resources>
+    <string name="xposed_description">Bestem språket for hver individuelle app</string>
+
+    <string name="loading_apps">Laster inn apper&#8230;</string>
+    <string name="action_search">Søk</string>
+    <string name="action_language">Språk</string>
+    <string name="choose_languages">Velg språkalternativer</string>
+    <string name="choose_languages_save">Lagre</string>
+    <string name="choose_languages_cancel">Lukk</string>
+    <string name="show_system_apps">Vis systemapper</string>
+    <string name="show_only_modified_apps">Vis bare justerte apper</string>
+</resources>
