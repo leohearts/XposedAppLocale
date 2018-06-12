@@ -14,6 +14,7 @@
     <string-array name="locales" translatable="false">
         <item>ar-EG</item>
         <item>ar-IL</item>
+        <item>ar-SA</item>
         <item>be</item>
         <item>bg</item>
         <item>ca</item>
@@ -89,7 +90,7 @@
         <item>vo</item>
         <item>zh-CN</item>
         <item>zh-HK</item>
+        <item>zh-SG</item>
         <item>zh-TW</item>
-        <item>zh-HK</item>
     </string-array>
 </resources>
