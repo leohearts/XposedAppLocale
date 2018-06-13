@@ -1,0 +1,12 @@
+<resources>
+    <string name="xposed_description">Cambia o idioma para cada aplicación individual</string>
+
+    <string name="loading_apps">Cargando aplicacións…</string>
+    <string name="action_search">Buscar</string>
+    <string name="action_language">Idiomas</string>
+    <string name="choose_languages">Escoller idiomas</string>
+    <string name="choose_languages_save">Gardar</string>
+    <string name="choose_languages_cancel">Cancelar</string>
+    <string name="show_system_apps">Mostrar apps do sistema</string>
+    <string name="show_only_modified_apps">Mostrar só apps modificadas</string>
+</resources>
