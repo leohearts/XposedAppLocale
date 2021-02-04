@@ -1,4 +1,4 @@
-package com.flo354.xposed.applocale;
+package com.leohearts.xposed.applocale;
 
 public class Common {
 

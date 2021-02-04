@@ -1,4 +1,4 @@
-package com.flo354.xposed.applocale;
+package com.leohearts.xposed.applocale;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

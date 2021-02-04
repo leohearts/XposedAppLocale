@@ -1,4 +1,4 @@
-package com.flo354.xposed.applocale;
+package com.leohearts.xposed.applocale;
 
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;

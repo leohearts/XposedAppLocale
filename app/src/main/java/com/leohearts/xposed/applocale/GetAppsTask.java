@@ -1,4 +1,4 @@
-package com.flo354.xposed.applocale;
+package com.leohearts.xposed.applocale;
 
 import android.app.ProgressDialog;
 import android.content.pm.PackageInfo;
